@@ -38,6 +38,11 @@ try {
 
 require('source-map-support').install()
 
+process.on('unhandledRejection', (err, p) => {
+  console.error('Unhandled promise rejection', err, p);
+  process.exit(1);
+});
+
 describe('functional tests', function() {
   this.timeout(30 * 60 * 1000)
   var playConfig = {}
@@ -367,6 +372,12 @@ describe('functional tests', function() {
         done()
       })
     })
+
+    step(`getObject(bucketName, objectName, cb)_bucketName:${bucketName} non-existed should not trigger unhandled rejections`, done => {
+      // This happened to me right after getObject with callback, which we do in previous step
+      // But I can't reproduce it here
+      setTimeout(done, 1000);
+    });
 
     step(`getPartialObject(bucketName, objectName, offset, length, cb)_bucketName:${bucketName}, objectName:${_6mbObjectName}, offset:0, length:100*1024_`, done => {
       var hash = crypto.createHash('md5')
